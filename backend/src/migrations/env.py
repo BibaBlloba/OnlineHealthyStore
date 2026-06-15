@@ -12,7 +12,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from src.config import settings
 from src.database import Base
-import src.schemas
+import src.models
 
 config = context.config
 
