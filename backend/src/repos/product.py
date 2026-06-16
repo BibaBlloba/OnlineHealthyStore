@@ -1,4 +1,4 @@
-from sqlalchemy import select, update
+from sqlalchemy import select, update, asc, desc, select
 from sqlalchemy.orm import selectinload
 
 from src.models.product import Product
@@ -19,13 +19,28 @@ class ProductsRepository(BaseRepository):
             self.mapper.map_to_domain_entity(model) for model in result.scalars().all()
         ]
 
-    async def get_filtered(self, *filters, **filter_by):
+    async def get_all_with_filters(
+        self,
+        *filters,
+        order_by: str | None = None,
+        order_dir: str = 'asc',
+        **filter_by,
+    ):
         query = (
             select(self.model)
             .options(selectinload(self.model.images))
             .filter(*filters)
             .filter_by(**filter_by)
         )
+
+        if order_by:
+            column = getattr(self.model, order_by, None)
+
+            if column is not None:
+                if order_dir == 'desc':
+                    query = query.order_by(desc(column))
+                else:
+                    query = query.order_by(asc(column))
 
         result = await self.session.execute(query)
 

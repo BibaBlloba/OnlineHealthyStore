@@ -2,10 +2,9 @@ from typing import Type
 
 from asyncpg.exceptions import DataError
 from pydantic import BaseModel
-from sqlalchemy import delete, insert, select, update
+from sqlalchemy import delete, insert, select, update, asc, desc, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError
 
 from src.database import Base
 from src.exceptions import ObjectNotFoundException
@@ -127,6 +126,30 @@ class BaseRepository:
         offset = (page - 1) * per_page
 
         query = select(self.model).offset(offset).limit(per_page)
+
+        result = await self.session.execute(query)
+
+        return [
+            self.mapper.map_to_domain_entity(model) for model in result.scalars().all()
+        ]
+
+    async def get_sorted_filtered(
+        self,
+        *filters,
+        order_by: str | None = None,
+        order_dir: str = 'asc',
+        **filter_by,
+    ):
+        query = select(self.model).filter(*filters).filter_by(**filter_by)
+
+        if order_by:
+            column = getattr(self.model, order_by, None)
+
+            if column is not None:
+                if order_dir == 'desc':
+                    query = query.order_by(desc(column))
+                else:
+                    query = query.order_by(asc(column))
 
         result = await self.session.execute(query)
 

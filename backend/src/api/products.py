@@ -77,6 +77,8 @@ async def get_products(
     category_id: int | None = None,
     min_price: int | None = None,
     max_price: int | None = None,
+    order_by: str | None = None,
+    order_dir: str = 'asc',
 ):
     filters = []
 
@@ -89,7 +91,11 @@ async def get_products(
     if max_price is not None:
         filters.append(Product.price <= max_price)
 
-    return await db.products.get_filtered(*filters)
+    return await db.products.get_all_with_filters(
+        *filters,
+        order_by=order_by,
+        order_dir=order_dir,
+    )
 
 
 @router.get('/{product_id}')
