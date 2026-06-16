@@ -35,6 +35,9 @@ class ProductsRepository(BaseRepository):
                     desc(column) if params.order_dir == 'desc' else asc(column)
                 )
 
+        offset = (params.page - 1) * params.per_page
+        query = query.offset(offset).limit(params.per_page)
+
         result = await self.session.execute(query)
 
         products = result.scalars().unique().all()

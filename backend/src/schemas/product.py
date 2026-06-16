@@ -39,3 +39,6 @@ class ProductSearchParams(BaseModel):
     name: Optional[str] = None
     order_by: Optional[str] = None
     order_dir: str = 'asc'
+
+    page: int = 1
+    per_page: int = 10
