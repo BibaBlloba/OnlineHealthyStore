@@ -130,3 +130,29 @@ async def update_product_image(
     await db.commit()
 
     return {'status': 'image updated'}
+
+
+@router.delete('/{product_id}/image')
+async def delete_product_image(
+    product_id: int,
+    db: DbDep,
+    _: dict = AdminOnly,
+):
+    image = await db.product_images.get_one_or_none(product_id=product_id)
+
+    if not image:
+        raise HTTPException(
+            status_code=404,
+            detail='Изображение не найдено',
+        )
+
+    file_path = Path(image.image_url.lstrip('/'))
+
+    if file_path.exists():
+        file_path.unlink()
+
+    await db.product_images.delete(product_id=product_id)
+
+    await db.commit()
+
+    return {'status': 'image deleted'}
