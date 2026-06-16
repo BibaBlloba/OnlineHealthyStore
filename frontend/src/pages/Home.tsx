@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useProducts } from "../hooks/useProducts"
 import { useCart } from "../store/cart"
+import ProductCard from "../components/ProductCard"
 
 export default function Home() {
   const [page, setPage] = useState(1)
@@ -16,21 +17,10 @@ export default function Home() {
     <div className="p-6">
       <div className="grid grid-cols-3 gap-4">
         {data.items.map((p: any) => (
-          <div key={p.id} className="border p-4 rounded-xl">
-            <h2>{p.name}</h2>
-            <p>{p.price} ₽</p>
-
-            <button
-              className="mt-2 bg-green-500 text-white px-3 py-1 rounded"
-              onClick={() => add(p)}
-            >
-              В корзину
-            </button>
-          </div>
+          <ProductCard key={p.id} product={p} onAdd={add} />
         ))}
       </div>
 
-      {/* пагинация */}
       <div className="flex gap-2 mt-6 items-center">
         <button
           className="px-3 py-1 border"
