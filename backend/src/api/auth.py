@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, HTTPException, Response
+from fastapi import APIRouter, Body, HTTPException, Query, Response
 
 from src.api.dependencies import AdminOnly, CurrentUserDep, DbDep, UserIdDap
 from src.exceptions import UserAlredyRegistered
@@ -64,7 +64,6 @@ async def logout(
     response: Response,
 ):
     response.delete_cookie('access_token')
-    # raise HTTPException(status_code=200)
     return {'status': 'ok'}
 
 
@@ -74,6 +73,19 @@ async def get_me(
     db: DbDep,
 ):
     return await db.users.get_one_or_none(id=current_user['user_id'])
+
+
+@router.get('/')
+async def get_all_users(
+    db: DbDep,
+    _: dict = AdminOnly,
+    page: int = Query(1, ge=1),
+    per_page: int = Query(10, ge=1, le=100),
+):
+    return await db.users.paginate(
+        page=page,
+        per_page=per_page,
+    )
 
 
 @router.delete('/{user_id}')
