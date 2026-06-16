@@ -4,6 +4,7 @@ from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -21,9 +22,22 @@ async def lifespan(app: FastAPI):
     yield
 
 
+origins = [
+    'http://localhost',
+    'http://localhost:5173',
+]
+
 app = FastAPI(lifespan=lifespan)
 app.include_router(router_auth)
 app.include_router(router_products)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
 
 
 if __name__ == '__main__':
