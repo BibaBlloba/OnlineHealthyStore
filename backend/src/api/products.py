@@ -71,9 +71,18 @@ async def get_products(
     min_price: int | None = None,
     max_price: int | None = None,
 ):
-    return await db.products.get_filtered(
-        *([Product.category_id == category_id if category_id else True])
-    )
+    filters = []
+
+    if category_id is not None:
+        filters.append(Product.category_id == category_id)
+
+    if min_price is not None:
+        filters.append(Product.price >= min_price)
+
+    if max_price is not None:
+        filters.append(Product.price <= max_price)
+
+    return await db.products.get_filtered(*filters)
 
 
 @router.get('/{product_id}')

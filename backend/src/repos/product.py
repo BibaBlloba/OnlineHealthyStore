@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 
 from src.models.product import Product
@@ -41,9 +41,30 @@ class ProductsRepository(BaseRepository):
         )
 
         result = await self.session.execute(query)
+
         model = result.scalars().one_or_none()
 
         if model is None:
             return None
+
+        return self.mapper.map_to_domain_entity(model)
+
+    async def edit(self, data, exclude_unset=False, **filter_by):
+        await self.session.execute(
+            update(self.model)
+            .filter_by(**filter_by)
+            .values(data.model_dump(exclude_unset=exclude_unset))
+        )
+
+        await self.session.commit()
+
+        query = (
+            select(self.model)
+            .options(selectinload(self.model.images))
+            .filter_by(**filter_by)
+        )
+
+        result = await self.session.execute(query)
+        model = result.scalars().one()
 
         return self.mapper.map_to_domain_entity(model)
