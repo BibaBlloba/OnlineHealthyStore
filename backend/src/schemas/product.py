@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -29,3 +30,12 @@ class ProductRead(ProductBase):
     images: list[ProductImageRead] = []
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ProductSearchParams(BaseModel):
+    category_id: Optional[int] = None
+    min_price: Optional[int] = None
+    max_price: Optional[int] = None
+    name: Optional[str] = None
+    order_by: Optional[str] = None
+    order_dir: str = 'asc'

@@ -1,6 +1,8 @@
-from sqlalchemy import select, update, asc, desc, select
+from sqlalchemy import select, asc, desc
 from sqlalchemy.orm import selectinload
 
+from src.models.productImage import ProductImage
+from src.schemas.product import ProductRead
 from src.models.product import Product
 from src.repos.base import BaseRepository
 from src.repos.mappers.mappers import ProductsDataMapper
@@ -10,76 +12,30 @@ class ProductsRepository(BaseRepository):
     model = Product
     mapper = ProductsDataMapper
 
-    async def get_all_with_images(self):
-        query = select(self.model).options(selectinload(self.model.images))
+    async def search(self, params):
+        query = select(self.model, ProductImage).join(ProductImage, isouter=True)
 
-        result = await self.session.execute(query)
+        if params.category_id is not None:
+            query = query.where(self.model.category_id == params.category_id)
 
-        return [
-            self.mapper.map_to_domain_entity(model) for model in result.scalars().all()
-        ]
+        if params.min_price is not None:
+            query = query.where(self.model.price >= params.min_price)
 
-    async def get_all_with_filters(
-        self,
-        *filters,
-        order_by: str | None = None,
-        order_dir: str = 'asc',
-        **filter_by,
-    ):
-        query = (
-            select(self.model)
-            .options(selectinload(self.model.images))
-            .filter(*filters)
-            .filter_by(**filter_by)
-        )
+        if params.max_price is not None:
+            query = query.where(self.model.price <= params.max_price)
 
-        if order_by:
-            column = getattr(self.model, order_by, None)
+        if params.name:
+            query = query.where(self.model.name.ilike(f'%{params.name}%'))
+
+        if params.order_by:
+            column = getattr(self.model, params.order_by, None)
 
             if column is not None:
-                if order_dir == 'desc':
-                    query = query.order_by(desc(column))
-                else:
-                    query = query.order_by(asc(column))
+                query = query.order_by(
+                    desc(column) if params.order_dir == 'desc' else asc(column)
+                )
 
         result = await self.session.execute(query)
+        products = result.scalars().unique().all()
 
-        return [
-            self.mapper.map_to_domain_entity(model) for model in result.scalars().all()
-        ]
-
-    async def get_one_or_none(self, **filter_by):
-        query = (
-            select(self.model)
-            .options(selectinload(self.model.images))
-            .filter_by(**filter_by)
-        )
-
-        result = await self.session.execute(query)
-
-        model = result.scalars().one_or_none()
-
-        if model is None:
-            return None
-
-        return self.mapper.map_to_domain_entity(model)
-
-    async def edit(self, data, exclude_unset=False, **filter_by):
-        await self.session.execute(
-            update(self.model)
-            .filter_by(**filter_by)
-            .values(data.model_dump(exclude_unset=exclude_unset))
-        )
-
-        await self.session.commit()
-
-        query = (
-            select(self.model)
-            .options(selectinload(self.model.images))
-            .filter_by(**filter_by)
-        )
-
-        result = await self.session.execute(query)
-        model = result.scalars().one()
-
-        return self.mapper.map_to_domain_entity(model)
+        return [self.mapper.map_to_domain_entity(p) for p in products]

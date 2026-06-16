@@ -44,6 +44,18 @@ class ProductsDataMapper(DataMapper):
     db_model = Product
     schema = ProductRead
 
+    @classmethod
+    def map_to_domain_entity(cls, product: Product):
+        return ProductRead(
+            id=product.id,
+            name=product.name,
+            description=product.description,
+            price=product.price,
+            stock_quantity=product.stock_quantity,
+            category_id=product.category_id,
+            images=[],
+        )
+
 
 class ProductImagesDataMapper(DataMapper):
     db_model = ProductImage

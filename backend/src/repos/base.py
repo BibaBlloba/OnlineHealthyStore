@@ -60,7 +60,9 @@ class BaseRepository:
         return self.mapper.map_to_domain_entity(model)
 
     async def add(self, data: BaseModel):
-        stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
+        values = data.model_dump(exclude_unset=True, exclude={'id'})
+
+        stmt = insert(self.model).values(**values).returning(self.model)
 
         try:
             result = await self.session.execute(stmt)

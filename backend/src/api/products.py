@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 import shutil
 from pathlib import Path
 
@@ -11,7 +11,7 @@ from src.api.dependencies import (
     DbDep,
     AdminOnly,
 )
-from src.schemas.product import ProductCreate, ProductUpdate
+from src.schemas.product import ProductCreate, ProductSearchParams, ProductUpdate
 
 
 router = APIRouter(prefix='/products', tags=['Products'])
@@ -74,28 +74,9 @@ async def update_product(
 @router.get('/')
 async def get_products(
     db: DbDep,
-    category_id: int | None = None,
-    min_price: int | None = None,
-    max_price: int | None = None,
-    order_by: str | None = None,
-    order_dir: str = 'asc',
+    params: ProductSearchParams = Depends(),
 ):
-    filters = []
-
-    if category_id is not None:
-        filters.append(Product.category_id == category_id)
-
-    if min_price is not None:
-        filters.append(Product.price >= min_price)
-
-    if max_price is not None:
-        filters.append(Product.price <= max_price)
-
-    return await db.products.get_all_with_filters(
-        *filters,
-        order_by=order_by,
-        order_dir=order_dir,
-    )
+    return await db.products.search(params)
 
 
 @router.get('/{product_id}')
