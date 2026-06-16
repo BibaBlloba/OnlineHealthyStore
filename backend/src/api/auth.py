@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Body, HTTPException, Response
 
-from src.api.dependencies import CurrentUserDep, DbDep, UserIdDap
+from src.api.dependencies import AdminOnly, CurrentUserDep, DbDep, UserIdDap
 from src.exceptions import UserAlredyRegistered
 from src.schemas.user import UserAdd, UserLogin, UserRequestAdd
 from src.services.auth import AuthService
@@ -74,3 +74,22 @@ async def get_me(
     db: DbDep,
 ):
     return await db.users.get_one_or_none(id=current_user['user_id'])
+
+
+@router.delete('/{user_id}')
+async def delete_user(
+    user_id: int,
+    db: DbDep,
+    _: dict = AdminOnly,
+):
+    deleted = await db.users.delete(id=user_id)
+
+    if deleted == 0:
+        raise HTTPException(
+            status_code=404,
+            detail='Пользователь не найден',
+        )
+
+    await db.commit()
+
+    return {'status': 'deleted'}
