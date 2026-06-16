@@ -1,4 +1,4 @@
-from sqlalchemy import insert, select, asc, desc, update
+from sqlalchemy import func, insert, select, asc, desc, update
 from sqlalchemy.orm import selectinload
 
 from src.models.productImage import ProductImage
@@ -42,7 +42,14 @@ class ProductsRepository(BaseRepository):
 
         products = result.scalars().unique().all()
 
-        return [self.mapper.map_to_domain_entity(p) for p in products]
+        total = await self.session.scalar(select(func.count(Product.id)))
+
+        return {
+            'items': [self.mapper.map_to_domain_entity(p) for p in products],
+            'page': params.page,
+            'per_page': params.per_page,
+            'total': total,
+        }
 
     async def get_one_or_none(self, **filter_by):
         query = (
