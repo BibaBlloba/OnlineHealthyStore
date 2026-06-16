@@ -123,7 +123,7 @@ class BaseRepository:
     async def paginate(
         self,
         page: int = 1,
-        per_page: int = 10,
+        per_page: int = 100,
     ):
         offset = (page - 1) * per_page
 
