@@ -11,6 +11,6 @@ class ProductImage(Base):
 
     image_url = Column(String(500))
 
-    product_id = Column(Integer, ForeignKey('products.id'))
+    product_id = Column(Integer, ForeignKey('products.id', ondelete='CASCADE'))
 
     product = relationship('Product', back_populates='images')
