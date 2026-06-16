@@ -1,4 +1,4 @@
-from sqlalchemy import select, asc, desc
+from sqlalchemy import insert, select, asc, desc, update
 from sqlalchemy.orm import selectinload
 
 from src.models.productImage import ProductImage
@@ -13,22 +13,22 @@ class ProductsRepository(BaseRepository):
     mapper = ProductsDataMapper
 
     async def search(self, params):
-        query = select(self.model, ProductImage).join(ProductImage, isouter=True)
+        query = select(Product).options(selectinload(Product.images))
 
         if params.category_id is not None:
-            query = query.where(self.model.category_id == params.category_id)
+            query = query.where(Product.category_id == params.category_id)
 
         if params.min_price is not None:
-            query = query.where(self.model.price >= params.min_price)
+            query = query.where(Product.price >= params.min_price)
 
         if params.max_price is not None:
-            query = query.where(self.model.price <= params.max_price)
+            query = query.where(Product.price <= params.max_price)
 
         if params.name:
-            query = query.where(self.model.name.ilike(f'%{params.name}%'))
+            query = query.where(Product.name.ilike(f'%{params.name}%'))
 
         if params.order_by:
-            column = getattr(self.model, params.order_by, None)
+            column = getattr(Product, params.order_by, None)
 
             if column is not None:
                 query = query.order_by(
@@ -36,6 +36,81 @@ class ProductsRepository(BaseRepository):
                 )
 
         result = await self.session.execute(query)
+
         products = result.scalars().unique().all()
 
         return [self.mapper.map_to_domain_entity(p) for p in products]
+
+    async def get_one_or_none(self, **filter_by):
+        query = (
+            select(Product).options(selectinload(Product.images)).filter_by(**filter_by)
+        )
+
+        result = await self.session.execute(query)
+        product = result.scalar_one_or_none()
+
+        if product is None:
+            return None
+
+        return self.mapper.map_to_domain_entity(product)
+
+    async def get_one(self, **filter_by):
+        query = (
+            select(Product).options(selectinload(Product.images)).filter_by(**filter_by)
+        )
+
+        result = await self.session.execute(query)
+
+        product = result.scalar_one()
+
+        return self.mapper.map_to_domain_entity(product)
+
+    async def add(self, data):
+        values = data.model_dump(exclude_unset=True, exclude={'id'})
+
+        stmt = insert(Product).values(**values).returning(Product.id)
+
+        result = await self.session.execute(stmt)
+
+        product_id = result.scalar_one()
+
+        query = (
+            select(Product)
+            .options(selectinload(Product.images))
+            .where(Product.id == product_id)
+        )
+
+        result = await self.session.execute(query)
+
+        product = result.scalar_one()
+
+        return self.mapper.map_to_domain_entity(product)
+
+    async def edit(
+        self,
+        data,
+        exclude_unset: bool = False,
+        **filter_by,
+    ):
+        stmt = (
+            update(Product)
+            .filter_by(**filter_by)
+            .values(data.model_dump(exclude_unset=exclude_unset))
+            .returning(Product.id)
+        )
+
+        result = await self.session.execute(stmt)
+
+        product_id = result.scalar_one()
+
+        query = (
+            select(Product)
+            .options(selectinload(Product.images))
+            .where(Product.id == product_id)
+        )
+
+        result = await self.session.execute(query)
+
+        product = result.scalar_one()
+
+        return self.mapper.map_to_domain_entity(product)

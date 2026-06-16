@@ -53,7 +53,10 @@ class ProductsDataMapper(DataMapper):
             price=product.price,
             stock_quantity=product.stock_quantity,
             category_id=product.category_id,
-            images=[],
+            images=[
+                ProductImageRead.model_validate(img, from_attributes=True)
+                for img in product.images
+            ],
         )
 
 
