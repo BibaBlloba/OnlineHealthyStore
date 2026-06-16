@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
-from app.schemas.cart_item import CartItemRead
+from src.schemas.cartItem import CartItemRead
 
 
 class CartRead(BaseModel):

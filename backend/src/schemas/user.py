@@ -8,7 +8,19 @@ class UserBase(BaseModel):
     role_id: int
 
 
-class UserCreate(UserBase):
+class UserAdd(UserBase):
+    password_hash: str
+
+
+class UserRequestAdd(BaseModel):
+    email: EmailStr
+    first_name: str
+    last_name: str
+    password: str
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
     password: str
 
 

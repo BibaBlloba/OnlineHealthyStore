@@ -1,8 +1,8 @@
 from src.models.cart import Cart
 from src.repos.base import BaseRepository
-from src.repos.mappers import CartDataMapper
+from src.repos.mappers.mappers import CartsDataMapper
 
 
 class CartRepository(BaseRepository):
     model = Cart
-    mapper = CartDataMapper
+    mapper = CartsDataMapper

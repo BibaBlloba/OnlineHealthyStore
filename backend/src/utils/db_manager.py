@@ -3,7 +3,7 @@ from src.repos.user import UsersRepository
 from src.repos.category import CategoriesRepository
 from src.repos.product import ProductsRepository
 from src.repos.productImage import ProductImagesRepository
-from src.repos.cart import CartsRepository
+from src.repos.cart import CartRepository
 from src.repos.cartItem import CartItemsRepository
 from src.repos.order import OrdersRepository
 from src.repos.orderItem import OrderItemsRepository
@@ -26,7 +26,7 @@ class DbManager:
         self.products = ProductsRepository(self.session)
         self.product_images = ProductImagesRepository(self.session)
 
-        self.carts = CartsRepository(self.session)
+        self.carts = CartRepository(self.session)
         self.cart_items = CartItemsRepository(self.session)
 
         self.orders = OrdersRepository(self.session)

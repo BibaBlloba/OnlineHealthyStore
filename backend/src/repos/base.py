@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
 from src.database import Base
 from src.exceptions import ObjectNotFoundException
@@ -64,8 +65,8 @@ class BaseRepository:
 
         try:
             result = await self.session.execute(stmt)
-        except IntegrityError:
-            raise ObjectNotFoundException
+        except IntegrityError as e:
+            raise
 
         model = result.scalars().one()
 

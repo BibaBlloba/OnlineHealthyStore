@@ -1,14 +1,14 @@
-from src.models.role import RoleOrm
-from src.models.user import UserOrm
-from src.models.category import CategoryOrm
-from src.models.product import ProductOrm
-from src.models.productImage import ProductImageOrm
-from src.models.cart import CartOrm
-from src.models.cartItem import CartItemOrm
-from src.models.order import OrderOrm
-from src.models.orderItem import OrderItemOrm
-from src.models.payment import PaymentOrm
-from src.models.review import ReviewOrm
+from src.models.role import Role
+from src.models.user import User
+from src.models.category import Category
+from src.models.product import Product
+from src.models.productImage import ProductImage
+from src.models.cart import Cart
+from src.models.cartItem import CartItem
+from src.models.order import Order
+from src.models.orderItem import OrderItem
+from src.models.payment import Payment
+from src.models.review import Review
 
 from src.schemas.role import RoleRead
 from src.schemas.user import UserRead
@@ -26,55 +26,55 @@ from src.repos.mappers.base import DataMapper
 
 
 class RolesDataMapper(DataMapper):
-    db_model = RoleOrm
+    db_model = Role
     schema = RoleRead
 
 
 class UsersDataMapper(DataMapper):
-    db_model = UserOrm
+    db_model = User
     schema = UserRead
 
 
 class CategoriesDataMapper(DataMapper):
-    db_model = CategoryOrm
+    db_model = Category
     schema = CategoryRead
 
 
 class ProductsDataMapper(DataMapper):
-    db_model = ProductOrm
+    db_model = Product
     schema = ProductRead
 
 
 class ProductImagesDataMapper(DataMapper):
-    db_model = ProductImageOrm
+    db_model = ProductImage
     schema = ProductImageRead
 
 
 class CartsDataMapper(DataMapper):
-    db_model = CartOrm
+    db_model = Cart
     schema = CartRead
 
 
 class CartItemsDataMapper(DataMapper):
-    db_model = CartItemOrm
+    db_model = CartItem
     schema = CartItemRead
 
 
 class OrdersDataMapper(DataMapper):
-    db_model = OrderOrm
+    db_model = Order
     schema = OrderRead
 
 
 class OrderItemsDataMapper(DataMapper):
-    db_model = OrderItemOrm
+    db_model = OrderItem
     schema = OrderItemRead
 
 
 class PaymentsDataMapper(DataMapper):
-    db_model = PaymentOrm
+    db_model = Payment
     schema = PaymentRead
 
 
 class ReviewsDataMapper(DataMapper):
-    db_model = ReviewOrm
+    db_model = Review
     schema = ReviewRead

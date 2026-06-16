@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict
 
-from src.schemas.product_image import ProductImageRead
+from src.schemas.productImage import ProductImageRead
 
 
 class ProductBase(BaseModel):

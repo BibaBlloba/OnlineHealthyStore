@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict
 
-from app.schemas.order_item import OrderItemRead
+from src.schemas.orderItem import OrderItemRead
 
 
 class OrderCreate(BaseModel):
