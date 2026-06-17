@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 import shutil
 from pathlib import Path
 
@@ -159,37 +159,20 @@ async def delete_product_image(
     return {'status': 'image deleted'}
 
 
-@router.post('/{product_id}/reviews', response_model=ReviewRead)
-async def create_review(
+@router.get('/{product_id}/reviews')
+async def get_reviews(
     product_id: int,
-    data: ReviewCreate,
     db: DbDep,
-    current_user: CurrentUserDep,
+    page: int = Query(1, ge=1),
+    per_page: int = Query(10, ge=1, le=100),
 ):
     product = await db.products.get_one_or_none(id=product_id)
 
     if not product:
         raise HTTPException(status_code=404, detail='Товар не найден')
 
-    review = await db.reviews.add(
-        ReviewCreate(
-            rating=data.rating,
-            comment=data.comment,
-            product_id=product_id,
-            user_id=current_user['user_id'],
-        )
+    return await db.reviews.get_by_product_paginated(
+        product_id=product_id,
+        page=page,
+        per_page=per_page,
     )
-
-    await db.commit()
-
-    return review
-
-
-@router.get('/{product_id}/reviews', response_model=list[ReviewRead])
-async def get_reviews(product_id: int, db: DbDep):
-    product = await db.products.get_one_or_none(id=product_id)
-
-    if not product:
-        raise HTTPException(status_code=404, detail='Товар не найден')
-
-    return await db.reviews.get_filtered(product_id=product_id)
