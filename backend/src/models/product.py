@@ -16,7 +16,7 @@ class Product(Base):
 
     stock_quantity = Column(Integer, default=0)
 
-    category_id = Column(Integer, ForeignKey('categories.id'))
+    category_id = Column(Integer, ForeignKey('categories.id', ondelete='CASCADE'))
 
     category = relationship('Category', back_populates='products')
 
