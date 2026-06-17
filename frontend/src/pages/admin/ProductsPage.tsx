@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
@@ -6,12 +6,16 @@ import ProductFilters from "../../components/admin/ProductFilters"
 
 import {
   createProduct,
+  deleteProduct,
+  deleteProductImage,
+  getProduct,
   getProducts,
+  updateProduct,
   uploadProductImage,
 } from "../../api/products"
 import { getCategories } from "../../api/categories"
 
-const EMPTY_CREATE_FORM = {
+const EMPTY_FORM = {
   name: "",
   description: "",
   price: "",
@@ -22,10 +26,10 @@ const EMPTY_CREATE_FORM = {
 export default function ProductsPage() {
   const queryClient = useQueryClient()
 
-  const [filters, setFilters] =
-    useState({})
-  const [isCreateOpen, setIsCreateOpen] = useState(false)
-  const [createForm, setCreateForm] = useState(EMPTY_CREATE_FORM)
+  const [filters, setFilters] = useState({})
+  const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null)
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(null)
+  const [form, setForm] = useState(EMPTY_FORM)
   const [imageFile, setImageFile] = useState<File | null>(null)
 
   const productsQuery = useQuery({
@@ -39,14 +43,37 @@ export default function ProductsPage() {
     queryFn: getCategories,
   })
 
+  const selectedProductQuery = useQuery({
+    queryKey: ["product", selectedProductId],
+    queryFn: () => getProduct(selectedProductId as number),
+    enabled: modalMode === "edit" && selectedProductId !== null,
+  })
+
+  useEffect(() => {
+    if (modalMode === "create") {
+      setForm(EMPTY_FORM)
+      return
+    }
+
+    if (modalMode === "edit" && selectedProductQuery.data) {
+      setForm({
+        name: selectedProductQuery.data.name ?? "",
+        description: selectedProductQuery.data.description ?? "",
+        price: String(selectedProductQuery.data.price ?? ""),
+        stock_quantity: String(selectedProductQuery.data.stock_quantity ?? ""),
+        category_id: String(selectedProductQuery.data.category_id ?? ""),
+      })
+    }
+  }, [modalMode, selectedProductQuery.data])
+
   const createMutation = useMutation({
     mutationFn: async () => {
       const createdProduct = await createProduct({
-        name: createForm.name.trim(),
-        description: createForm.description.trim(),
-        price: Number(createForm.price),
-        stock_quantity: Number(createForm.stock_quantity),
-        category_id: Number(createForm.category_id),
+        name: form.name.trim(),
+        description: form.description.trim(),
+        price: Number(form.price),
+        stock_quantity: Number(form.stock_quantity),
+        category_id: Number(form.category_id),
       })
 
       if (imageFile) {
@@ -57,16 +84,92 @@ export default function ProductsPage() {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["products"] })
-      setIsCreateOpen(false)
-      setCreateForm(EMPTY_CREATE_FORM)
+      setModalMode(null)
+      setSelectedProductId(null)
+      setForm(EMPTY_FORM)
       setImageFile(null)
     },
   })
 
+  const updateMutation = useMutation({
+    mutationFn: async () => {
+      if (selectedProductId === null) {
+        throw new Error("No product selected")
+      }
+
+      const updatedProduct = await updateProduct(selectedProductId, {
+        name: form.name.trim(),
+        description: form.description.trim(),
+        price: Number(form.price),
+        stock_quantity: Number(form.stock_quantity),
+      })
+
+      if (imageFile) {
+        await uploadProductImage(selectedProductId, imageFile)
+      }
+
+      return updatedProduct
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["products"] })
+      if (selectedProductId !== null) {
+        await queryClient.invalidateQueries({ queryKey: ["product", selectedProductId] })
+      }
+      setModalMode(null)
+      setSelectedProductId(null)
+      setForm(EMPTY_FORM)
+      setImageFile(null)
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteProduct,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["products"] })
+      if (modalMode === "edit" && selectedProductId !== null) {
+        setModalMode(null)
+        setSelectedProductId(null)
+        setForm(EMPTY_FORM)
+        setImageFile(null)
+      }
+    },
+  })
+
+  const removeImageMutation = useMutation({
+    mutationFn: async () => {
+      if (selectedProductId === null) {
+        throw new Error("No product selected")
+      }
+
+      return deleteProductImage(selectedProductId)
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["products"] })
+      if (selectedProductId !== null) {
+        await queryClient.invalidateQueries({ queryKey: ["product", selectedProductId] })
+      }
+    },
+  })
+
   const handleOpenCreate = () => {
-    setCreateForm(EMPTY_CREATE_FORM)
     setImageFile(null)
-    setIsCreateOpen(true)
+    setForm(EMPTY_FORM)
+    setSelectedProductId(null)
+    setModalMode("create")
+  }
+
+  const handleOpenEdit = (productId: number) => {
+    setImageFile(null)
+    setForm(EMPTY_FORM)
+    setSelectedProductId(productId)
+    setModalMode("edit")
+  }
+
+  const handleCloseModal = () => {
+    setModalMode(null)
+    setSelectedProductId(null)
+    setForm(EMPTY_FORM)
+    setImageFile(null)
   }
 
   if (
@@ -95,10 +198,7 @@ export default function ProductsPage() {
 
       </div>
 
-      <ProductFilters
-        categories={categoriesQuery.data ?? []}
-        onChange={setFilters}
-      />
+      <ProductFilters categories={categoriesQuery.data ?? []} onChange={setFilters} />
 
       <table className="w-full mt-5">
 
@@ -131,11 +231,25 @@ export default function ProductsPage() {
                 </td>
 
                 <td>
-                  <button className="bg-yellow-400 text-black px-3 py-1 rounded mr-2" type="button">
+                  <button
+                    className="bg-yellow-400 text-black px-3 py-1 rounded mr-2"
+                    onClick={() => handleOpenEdit(product.id)}
+                    type="button"
+                  >
                     Edit
                   </button>
 
-                  <button className="bg-red-600 text-white px-3 py-1 rounded" type="button">
+                  <button
+                    className="bg-red-600 text-white px-3 py-1 rounded"
+                    onClick={() => {
+                      const confirmed = window.confirm("Delete this product?")
+
+                      if (confirmed) {
+                        deleteMutation.mutate(product.id)
+                      }
+                    }}
+                    type="button"
+                  >
                     Delete
                   </button>
 
@@ -148,31 +262,34 @@ export default function ProductsPage() {
 
       </table>
 
-      {isCreateOpen && (
+      {modalMode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-slate-900 p-6 text-slate-100 shadow-2xl shadow-black/40">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-2xl font-semibold tracking-tight text-white">
-                Add Product
+                {modalMode === "create" ? "Add Product" : "Edit Product"}
               </h2>
 
               <button
                 className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-300 transition hover:bg-white/10 hover:text-white"
-                onClick={() => setIsCreateOpen(false)}
+                onClick={handleCloseModal}
                 type="button"
               >
                 ✕
               </button>
             </div>
 
+            {modalMode === "edit" && selectedProductQuery.isLoading ? (
+              <div className="py-10 text-center text-slate-400">Loading product...</div>
+            ) : (
             <div className="grid gap-3">
               <input
                 className="rounded-xl border border-white/10 bg-slate-950/70 p-3 text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20"
                 placeholder="Name"
-                value={createForm.name}
+                value={form.name}
                 onChange={(e) =>
-                  setCreateForm({
-                    ...createForm,
+                  setForm({
+                    ...form,
                     name: e.target.value,
                   })
                 }
@@ -181,10 +298,10 @@ export default function ProductsPage() {
               <textarea
                 className="min-h-28 rounded-xl border border-white/10 bg-slate-950/70 p-3 text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20"
                 placeholder="Description"
-                value={createForm.description}
+                value={form.description}
                 onChange={(e) =>
-                  setCreateForm({
-                    ...createForm,
+                  setForm({
+                    ...form,
                     description: e.target.value,
                   })
                 }
@@ -196,10 +313,10 @@ export default function ProductsPage() {
                   placeholder="Price"
                   step="0.01"
                   type="number"
-                  value={createForm.price}
+                  value={form.price}
                   onChange={(e) =>
-                    setCreateForm({
-                      ...createForm,
+                    setForm({
+                      ...form,
                       price: e.target.value,
                     })
                   }
@@ -209,34 +326,59 @@ export default function ProductsPage() {
                   className="rounded-xl border border-white/10 bg-slate-950/70 p-3 text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20"
                   placeholder="Stock quantity"
                   type="number"
-                  value={createForm.stock_quantity}
+                  value={form.stock_quantity}
                   onChange={(e) =>
-                    setCreateForm({
-                      ...createForm,
+                    setForm({
+                      ...form,
                       stock_quantity: e.target.value,
                     })
                   }
                 />
               </div>
 
-              <select
-                className="rounded-xl border border-white/10 bg-slate-950/70 p-3 text-slate-100 outline-none transition focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20"
-                value={createForm.category_id}
-                onChange={(e) =>
-                  setCreateForm({
-                    ...createForm,
-                    category_id: e.target.value,
-                  })
-                }
-              >
-                <option value="">Select category</option>
-                {Array.isArray(categoriesQuery.data) &&
-                  categoriesQuery.data.map((category: any) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-              </select>
+              {modalMode === "create" && (
+                <select
+                  className="rounded-xl border border-white/10 bg-slate-950/70 p-3 text-slate-100 outline-none transition focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20"
+                  value={form.category_id}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      category_id: e.target.value,
+                    })
+                  }
+                >
+                  <option value="">Select category</option>
+                  {Array.isArray(categoriesQuery.data) &&
+                    categoriesQuery.data.map((category: any) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                </select>
+              )}
+
+              {modalMode === "edit" && selectedProductQuery.data?.images?.[0] && (
+                <div className="space-y-2 rounded-xl border border-white/10 bg-slate-950/70 p-3">
+                  <div className="text-sm text-slate-400">Current image</div>
+                  <img
+                    alt={selectedProductQuery.data.name}
+                    className="h-48 w-full rounded-lg bg-slate-950 object-contain"
+                    src={
+                      import.meta.env.VITE_API_BASE_URL +
+                      selectedProductQuery.data.images[0].image_url
+                    }
+                  />
+
+                  <button
+                    className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200 transition hover:bg-red-500/20"
+                    disabled={removeImageMutation.isPending}
+                    onClick={() => removeImageMutation.mutate()}
+                    type="button"
+                  >
+                    {removeImageMutation.isPending ? "Removing..." : "Remove image"}
+                  </button>
+                </div>
+              )}
 
               <input
                 className="rounded-xl border border-white/10 bg-slate-950/70 p-3 text-slate-100 file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-500 file:px-4 file:py-2 file:text-sm file:font-medium file:text-slate-950 hover:file:bg-emerald-400"
@@ -248,7 +390,7 @@ export default function ProductsPage() {
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-slate-200 transition hover:bg-white/10 hover:text-white"
-                  onClick={() => setIsCreateOpen(false)}
+                  onClick={handleCloseModal}
                   type="button"
                 >
                   Cancel
@@ -256,14 +398,25 @@ export default function ProductsPage() {
 
                 <button
                   className="rounded-xl bg-emerald-500 px-4 py-2 font-medium text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
-                  disabled={createMutation.isPending}
-                  onClick={() => createMutation.mutate()}
+                  disabled={createMutation.isPending || updateMutation.isPending}
+                  onClick={() => {
+                    if (modalMode === "create") {
+                      createMutation.mutate()
+                    } else {
+                      updateMutation.mutate()
+                    }
+                  }}
                   type="button"
                 >
-                  {createMutation.isPending ? "Saving..." : "Create"}
+                  {createMutation.isPending || updateMutation.isPending
+                    ? "Saving..."
+                    : modalMode === "create"
+                      ? "Create"
+                      : "Save changes"}
                 </button>
               </div>
             </div>
+            )}
           </div>
         </div>
       )}
