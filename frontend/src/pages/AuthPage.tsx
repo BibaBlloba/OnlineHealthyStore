@@ -48,7 +48,7 @@ export default function AuthPage() {
             Account access
           </p>
           <h1 className="mt-2 text-3xl font-semibold text-slate-50">
-            Вход в магазин
+            Вход
           </h1>
         </div>
 
