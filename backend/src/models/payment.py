@@ -9,7 +9,7 @@ class Payment(Base):
 
     id = Column(Integer, primary_key=True)
 
-    order_id = Column(Integer, ForeignKey('orders.id'), unique=True)
+    order_id = Column(Integer, ForeignKey('orders.id', ondelete='CASCADE'), unique=True)
 
     amount = Column(Numeric(10, 2), nullable=False)
 
