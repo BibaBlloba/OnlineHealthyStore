@@ -49,9 +49,6 @@ export default function UsersPage() {
           <h1 className="mt-2 text-3xl font-semibold text-slate-50">
             Пользователи
           </h1>
-          <p className="mt-2 text-slate-400">
-            Простое управление учетными записями без фильтров.
-          </p>
         </div>
 
         <div className="overflow-hidden rounded-3xl border border-white/10 bg-slate-950/80 shadow-xl shadow-black/30 backdrop-blur">
@@ -78,11 +75,10 @@ export default function UsersPage() {
                   <td className="px-5 py-4 text-sm text-slate-300">{user.email}</td>
                   <td className="px-5 py-4">
                     <span
-                      className={`inline-flex rounded-full border px-3 py-1 text-xs font-medium ${
-                        user.role_id === 1
+                      className={`inline-flex rounded-full border px-3 py-1 text-xs font-medium ${user.role_id === 1
                           ? "border-emerald-400/30 bg-emerald-400/15 text-emerald-300"
                           : "border-slate-500/30 bg-slate-500/10 text-slate-300"
-                      }`}
+                        }`}
                     >
                       {roleLabel(user.role_id)}
                     </span>
