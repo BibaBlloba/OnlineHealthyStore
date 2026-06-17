@@ -15,7 +15,7 @@ export default function Home() {
     queryKey: ["categories"],
     queryFn: getCategories,
   })
-  const add = useCart((s) => s.add)
+  const addProduct = useCart((s) => s.addProduct)
 
   if (isLoading || categoriesQuery.isLoading) return <div>Loading...</div>
   if (isError || !data) return <div>Не удалось загрузить товары</div>
@@ -41,7 +41,11 @@ export default function Home() {
 
       <div className="grid grid-cols-3 gap-4">
         {data.items.map((p: any) => (
-          <ProductCard key={p.id} product={p} onAdd={add} />
+          <ProductCard
+            key={p.id}
+            product={p}
+            onAdd={(product) => void addProduct(product.id)}
+          />
         ))}
       </div>
 

@@ -10,7 +10,9 @@ from fastapi.staticfiles import StaticFiles
 sys.path.append(str(Path(__file__).parent.parent))
 
 from src.api.auth import router as router_auth
+from src.api.cart import router as router_cart
 from src.api.category import router as router_categories
+from src.api.orders import router as router_orders
 from src.api.products import router as router_products
 from src.utils.admin_create import create_admin
 from src.utils.db_manager import DbManager
@@ -31,7 +33,9 @@ origins = [
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(router_auth)
+app.include_router(router_cart)
 app.include_router(router_categories)
+app.include_router(router_orders)
 app.include_router(router_products)
 
 app.add_middleware(

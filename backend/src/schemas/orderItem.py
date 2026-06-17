@@ -2,6 +2,8 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict
 
+from src.schemas.product import ProductRead
+
 
 class OrderItemBase(BaseModel):
     product_id: int
@@ -10,11 +12,12 @@ class OrderItemBase(BaseModel):
 
 
 class OrderItemCreate(OrderItemBase):
-    pass
+    order_id: int | None = None
 
 
 class OrderItemRead(OrderItemBase):
     id: int
     order_id: int
+    product: ProductRead
 
     model_config = ConfigDict(from_attributes=True)

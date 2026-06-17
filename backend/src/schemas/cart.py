@@ -3,6 +3,10 @@ from pydantic import BaseModel, ConfigDict
 from src.schemas.cartItem import CartItemRead
 
 
+class CartCreate(BaseModel):
+    user_id: int
+
+
 class CartRead(BaseModel):
     id: int
     user_id: int

@@ -6,12 +6,13 @@ export default function AdminPage() {
   const navigate = useNavigate()
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-2">
+    <div className="min-h-[calc(100svh-73px)] bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.12),_transparent_30%),linear-gradient(180deg,#020617_0%,#0f172a_100%)] px-4 py-8 text-slate-100">
+      <div className="mx-auto w-full max-w-6xl">
+      <h1 className="text-3xl font-semibold mb-2 text-slate-50">
         Admin Panel
       </h1>
 
-      <p className="text-gray-600 mb-8">
+      <p className="text-slate-400 mb-8">
         Welcome, {user?.first_name}
       </p>
 
@@ -19,43 +20,41 @@ export default function AdminPage() {
 
         <button
           onClick={() => navigate("/admin/products")}
-          className="border rounded-lg p-5 text-left hover:bg-gray-50 transition"
+          className="rounded-2xl border border-white/10 bg-slate-950/80 p-5 text-left transition hover:border-emerald-400/30 hover:bg-white/5"
         >
           <h2 className="font-semibold mb-2">
             Products
           </h2>
 
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-slate-400">
             Manage food items
           </p>
         </button>
 
         <button
           onClick={() => navigate("/admin/orders")}
-          className="border rounded-lg p-5 text-left hover:bg-gray-50 transition"
+          className="rounded-2xl border border-white/10 bg-slate-950/80 p-5 text-left transition hover:border-emerald-400/30 hover:bg-white/5"
         >
           <h2 className="font-semibold mb-2">
             Orders
           </h2>
 
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-slate-400">
             View customer orders
           </p>
         </button>
 
-        <button
-          onClick={() => navigate("/admin/categories")}
-          className="border rounded-lg p-5 text-left hover:bg-gray-50 transition"
-        >
-          <h2 className="font-semibold mb-2">
+        <div className="rounded-2xl border border-white/10 bg-slate-950/80 p-5 text-left">
+          <h2 className="font-semibold mb-2 text-slate-50">
             Categories
           </h2>
 
-          <p className="text-sm text-gray-500">
-            Manage categories
+          <p className="text-sm text-slate-400">
+            Categories management is not implemented yet.
           </p>
-        </button>
+        </div>
 
+      </div>
       </div>
     </div>
   )

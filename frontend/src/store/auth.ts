@@ -1,7 +1,22 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 
-export const useAuth = create(
+export type AuthUser = {
+  id?: number
+  email?: string
+  first_name?: string
+  last_name?: string
+  role_id?: number
+  [key: string]: unknown
+}
+
+type AuthStore = {
+  user: AuthUser | null
+  setUser: (user: AuthUser | null) => void
+  logout: () => void
+}
+
+export const useAuth = create<AuthStore>()(
   persist(
     (set) => ({
       user: null,

@@ -7,6 +7,7 @@ import CartPage from "./pages/CartPage"
 import AuthPage from "./pages/AuthPage"
 import AdminPage from "./pages/AdminPage"
 import ProductsPage from "./pages/admin/ProductsPage.tsx"
+import OrdersPage from "./pages/admin/OrdersPage"
 
 import MainLayout from "./layouts/MainLayout"
 import AdminLayout from "./layouts/AdminLayout"
@@ -43,6 +44,7 @@ export default function App() {
       >
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/admin/products" element={<ProductsPage />} />
+        <Route path="/admin/orders" element={<OrdersPage />} />
       </Route>
     </Routes>
   )

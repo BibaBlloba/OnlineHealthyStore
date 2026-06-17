@@ -18,7 +18,12 @@ class Order(Base):
     user = relationship('User', back_populates='orders')
 
     items = relationship(
-        'OrderItem', back_populates='order', cascade='all, delete-orphan'
+        'OrderItem',
+        back_populates='order',
+        cascade='all, delete-orphan',
+        lazy='selectin',
     )
 
-    payment = relationship('Payment', back_populates='order', uselist=False)
+    payment = relationship(
+        'Payment', back_populates='order', uselist=False, lazy='selectin'
+    )

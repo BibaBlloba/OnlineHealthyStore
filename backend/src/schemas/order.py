@@ -2,11 +2,19 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict
 
+from src.schemas.payment import PaymentRead
 from src.schemas.orderItem import OrderItemRead
 
 
 class OrderCreate(BaseModel):
-    pass
+    user_id: int
+    total_price: Decimal
+    status: str = 'pending'
+
+
+class OrderUpdate(BaseModel):
+    total_price: Decimal | None = None
+    status: str | None = None
 
 
 class OrderRead(BaseModel):
@@ -16,5 +24,6 @@ class OrderRead(BaseModel):
     status: str
 
     items: list[OrderItemRead] = []
+    payment: PaymentRead | None = None
 
     model_config = ConfigDict(from_attributes=True)

@@ -21,7 +21,10 @@ class Product(Base):
     category = relationship('Category', back_populates='products')
 
     images = relationship(
-        'ProductImage', back_populates='product', cascade='all, delete-orphan'
+        'ProductImage',
+        back_populates='product',
+        cascade='all, delete-orphan',
+        lazy='selectin',
     )
 
-    reviews = relationship('Review', back_populates='product')
+    reviews = relationship('Review', back_populates='product', lazy='selectin')
