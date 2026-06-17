@@ -1,4 +1,4 @@
-import { api } from "./client"
+import { privateApi } from "./client"
 
 export const register = async (data: {
   email: string
@@ -6,7 +6,7 @@ export const register = async (data: {
   last_name: string
   password: string
 }) => {
-  const res = await api.post("/auth/register", data)
+  const res = await privateApi.post("/auth/register", data)
   return res.data
 }
 
@@ -14,16 +14,16 @@ export const login = async (data: {
   email: string
   password: string
 }) => {
-  const res = await api.post("/auth/login", data)
+  const res = await privateApi.post("/auth/login", data)
   return res.data
 }
 
 export const logout = async () => {
-  const res = await api.post("/auth/logout")
+  const res = await privateApi.post("/auth/logout")
   return res.data
 }
 
 export const me = async () => {
-  const res = await api.get("/auth/me")
+  const res = await privateApi.get("/auth/me")
   return res.data
 }

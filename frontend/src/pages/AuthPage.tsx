@@ -1,8 +1,10 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { useLogin, useRegister } from "../hooks/useAuth"
 
 export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "register">("login")
+  const navigate = useNavigate()
 
   const login = useLogin()
   const register = useRegister()
@@ -23,6 +25,8 @@ export default function AuthPage() {
       login.mutate({
         email: form.email,
         password: form.password,
+      }, {
+        onSuccess: () => navigate("/"),
       })
     } else {
       register.mutate({
@@ -30,6 +34,8 @@ export default function AuthPage() {
         password: form.password,
         first_name: form.first_name,
         last_name: form.last_name,
+      }, {
+        onSuccess: () => navigate("/"),
       })
     }
   }

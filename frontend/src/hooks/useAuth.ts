@@ -10,11 +10,21 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: login,
     onSuccess: async () => {
-      const res = await fetch(`${API_BASE_URL}/auth/me`, {
-        credentials: "include",
-      })
-      const user = await res.json()
-      setUser(user)
+      try {
+        const res = await fetch(`${API_BASE_URL}/auth/me`, {
+          credentials: "include",
+        })
+
+        if (!res.ok) {
+          setUser(null)
+          return
+        }
+
+        const user = await res.json()
+        setUser(user)
+      } catch {
+        setUser(null)
+      }
     },
   })
 }

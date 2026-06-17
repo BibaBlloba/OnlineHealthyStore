@@ -1,6 +1,10 @@
 import axios from "axios"
 
-export const api = axios.create({
+export const publicApi = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+})
+
+export const privateApi = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
 })
