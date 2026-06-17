@@ -9,7 +9,13 @@ class ReviewBase(BaseModel):
 
 
 class ReviewCreate(ReviewBase):
-    pass
+    product_id: int
+
+
+class ReviewUpdate(BaseModel):
+    rating: int | None = None
+    comment: str | None = None
+    product_id: int | None = None
 
 
 class ReviewRead(ReviewBase):

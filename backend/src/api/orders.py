@@ -2,6 +2,7 @@ from decimal import Decimal
 from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException
+from sqlalchemy import text
 
 from src.api.dependencies import CurrentUserDep, DbDep
 from src.schemas.order import OrderCreate, OrderRead, OrderUpdate
@@ -114,11 +115,9 @@ async def pay_order(
     else:
         await db.payments.add(payment_payload)
 
-    await db.orders.edit(
-        data=OrderUpdate(status='paid'),
-        id=order_id,
-        exclude_unset=True,
-    )
+    await db.session.execute(text('CALL reduce_stock(:order_id)'), {'order_id': order_id})
+
+    await db.session.execute(text('CALL pay_order(:order_id)'), {'order_id': order_id})
 
     await db.commit()
 
