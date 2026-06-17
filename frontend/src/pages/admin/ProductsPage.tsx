@@ -27,15 +27,20 @@ export default function ProductsPage() {
   const queryClient = useQueryClient()
 
   const [filters, setFilters] = useState({})
+  const [page, setPage] = useState(1)
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null)
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [imageFile, setImageFile] = useState<File | null>(null)
 
   const productsQuery = useQuery({
-    queryKey: ["products", filters],
+    queryKey: ["products", filters, page],
     queryFn: () =>
-      getProducts(filters),
+      getProducts({
+        ...filters,
+        page,
+        per_page: 15,
+      }),
   })
 
   const categoriesQuery = useQuery({
@@ -172,12 +177,26 @@ export default function ProductsPage() {
     setImageFile(null)
   }
 
+  const handleFiltersChange = (nextFilters: any) => {
+    setPage(1)
+    setFilters(nextFilters)
+  }
+
   if (
     productsQuery.isLoading ||
     categoriesQuery.isLoading
   ) {
     return <div>Loading...</div>
   }
+
+  if (productsQuery.isError || !productsQuery.data) {
+    return <div>Не удалось загрузить товары</div>
+  }
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(productsQuery.data.total / productsQuery.data.per_page)
+  )
 
   return (
     <div className="p-6">
@@ -198,7 +217,7 @@ export default function ProductsPage() {
 
       </div>
 
-      <ProductFilters categories={categoriesQuery.data ?? []} onChange={setFilters} />
+      <ProductFilters categories={categoriesQuery.data ?? []} onChange={handleFiltersChange} />
 
       <table className="w-full mt-5">
 
@@ -261,6 +280,30 @@ export default function ProductsPage() {
         </tbody>
 
       </table>
+
+      <div className="flex gap-2 mt-6 items-center">
+        <button
+          className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={page === 1}
+          onClick={() => setPage((currentPage) => currentPage - 1)}
+          type="button"
+        >
+          ←
+        </button>
+
+        <span>
+          Страница: {page} / {totalPages}
+        </span>
+
+        <button
+          className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={page === totalPages}
+          onClick={() => setPage((currentPage) => currentPage + 1)}
+          type="button"
+        >
+          →
+        </button>
+      </div>
 
       {modalMode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
