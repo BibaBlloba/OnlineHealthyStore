@@ -59,6 +59,9 @@ def get_db_error_details(exception: Exception) -> tuple[int, str]:
         return 400, 'Не заполнено обязательное поле'
 
     if sqlstate == '23514':
+        if constraint_name == 'chk_product_price':
+            return 400, 'Цена товара должна быть больше 0'
+
         if constraint_name == 'chk_review_rating':
             return 400, 'Оценка отзыва должна быть от 1 до 5'
 
