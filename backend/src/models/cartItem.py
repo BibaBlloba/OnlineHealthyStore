@@ -9,7 +9,7 @@ class CartItem(Base):
 
     id = Column(Integer, primary_key=True)
 
-    cart_id = Column(Integer, ForeignKey('carts.id'))
+    cart_id = Column(Integer, ForeignKey('carts.id', ondelete='CASCADE'))
 
     product_id = Column(Integer, ForeignKey('products.id'))
 

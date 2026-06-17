@@ -9,7 +9,7 @@ class OrderItem(Base):
 
     id = Column(Integer, primary_key=True)
 
-    order_id = Column(Integer, ForeignKey('orders.id'))
+    order_id = Column(Integer, ForeignKey('orders.id', ondelete='CASCADE'))
 
     product_id = Column(Integer, ForeignKey('products.id'))
 
