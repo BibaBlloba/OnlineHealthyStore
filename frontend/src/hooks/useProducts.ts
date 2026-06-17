@@ -4,6 +4,10 @@ import { getProducts } from "../api/products"
 export const useProducts = (page: number) => {
   return useQuery({
     queryKey: ["products", page],
-    queryFn: () => getProducts(page),
+    queryFn: () =>
+      getProducts({
+        page,
+        per_page: 9,
+      }),
   })
 }

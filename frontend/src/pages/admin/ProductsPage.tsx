@@ -182,6 +182,14 @@ export default function ProductsPage() {
     setFilters(nextFilters)
   }
 
+  const handlePrevPage = () => {
+    setPage((currentPage) => Math.max(1, currentPage - 1))
+  }
+
+  const handleNextPage = () => {
+    setPage((currentPage) => Math.min(totalPages, currentPage + 1))
+  }
+
   if (
     productsQuery.isLoading ||
     categoriesQuery.isLoading
@@ -285,7 +293,7 @@ export default function ProductsPage() {
         <button
           className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={page === 1}
-          onClick={() => setPage((currentPage) => currentPage - 1)}
+          onClick={handlePrevPage}
           type="button"
         >
           ←
@@ -298,7 +306,7 @@ export default function ProductsPage() {
         <button
           className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={page === totalPages}
-          onClick={() => setPage((currentPage) => currentPage + 1)}
+          onClick={handleNextPage}
           type="button"
         >
           →

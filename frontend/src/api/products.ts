@@ -1,8 +1,15 @@
-import { privateApi, publicApi } from "./client"
+import { privateApi } from "./client"
 
-export const getProducts = async (params: any) => {
+export const getProducts = async (
+  params: number | Record<string, unknown> = 1
+) => {
+  const normalizedParams =
+    typeof params === "number"
+      ? { page: params, per_page: 15 }
+      : params
+
   const cleanParams = Object.fromEntries(
-    Object.entries(params).filter(
+    Object.entries(normalizedParams).filter(
       ([_, value]) =>
         value !== "" &&
         value !== null &&
