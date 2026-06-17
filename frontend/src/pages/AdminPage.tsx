@@ -168,6 +168,20 @@ export default function AdminPage() {
             </p>
           </button>
 
+          <button
+            onClick={() => navigate("/admin/reports")}
+            className="rounded-3xl border border-white/10 bg-slate-950/80 p-5 text-left transition hover:border-emerald-400/30 hover:bg-white/5"
+            type="button"
+          >
+            <h2 className="mb-2 text-lg font-semibold text-slate-50">
+              Отчеты
+            </h2>
+
+            <p className="text-sm text-slate-400">
+              Генерация и экспорт отчетов в PDF, DOCX и XLSX
+            </p>
+          </button>
+
         </div>
       </div>
 
