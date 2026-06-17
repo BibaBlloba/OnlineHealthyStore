@@ -1,5 +1,20 @@
 import { privateApi } from "./client"
 
+export type ProductReview = {
+  id: number
+  rating: number
+  comment: string
+  product_id: number
+  user_id: number
+}
+
+export type ProductReviewsResponse = {
+  items: ProductReview[]
+  page: number
+  per_page: number
+  total: number
+}
+
 export const getProducts = async (
   params: number | Record<string, unknown> = 1
 ) => {
@@ -26,6 +41,18 @@ export const getProducts = async (
 
 export const getProduct = async (id: number) => {
   const res = await privateApi.get(`/products/${id}`)
+
+  return res.data
+}
+
+export const getProductReviews = async (
+  productId: number,
+  page = 1,
+  perPage = 10
+): Promise<ProductReviewsResponse> => {
+  const res = await privateApi.get(`/products/${productId}/reviews`, {
+    params: { page, per_page: perPage },
+  })
 
   return res.data
 }

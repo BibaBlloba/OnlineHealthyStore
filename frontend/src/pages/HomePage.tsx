@@ -3,12 +3,15 @@ import { useQuery } from "@tanstack/react-query"
 import { useProducts } from "../hooks/useProducts"
 import { useCart } from "../store/cart"
 import ProductCard from "../components/ProductCard"
+import ProductDetailsModal from "../components/ProductDetailsModal.tsx"
 import ProductFilters from "../components/admin/ProductFilters"
 import { getCategories } from "../api/categories"
+import type { Product } from "../types/product"
 
 export default function Home() {
   const [page, setPage] = useState(1)
   const [filters, setFilters] = useState({})
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
   const { data, isLoading, isError } = useProducts(page, filters, 9)
   const categoriesQuery = useQuery({
@@ -40,11 +43,12 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        {data.items.map((p: any) => (
+        {data.items.map((p: Product) => (
           <ProductCard
             key={p.id}
             product={p}
-            onAdd={(product) => void addProduct(product.id)}
+            onOpen={() => setSelectedProduct(p)}
+            onAdd={(product: { id: number }) => void addProduct(product.id)}
           />
         ))}
       </div>
@@ -70,6 +74,15 @@ export default function Home() {
           →
         </button>
       </div>
+
+      {selectedProduct && (
+        <ProductDetailsModal
+          key={selectedProduct.id}
+          onAddToCart={(product: { id: number }) => void addProduct(product.id)}
+          onClose={() => setSelectedProduct(null)}
+          product={selectedProduct}
+        />
+      )}
     </div>
   )
 }
