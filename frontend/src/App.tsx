@@ -7,6 +7,7 @@ import CartPage from "./pages/CartPage"
 import AuthPage from "./pages/AuthPage"
 import AdminPage from "./pages/AdminPage"
 import ProductsPage from "./pages/admin/ProductsPage.tsx"
+import ReportsPage from "./pages/admin/ReportsPage.tsx"
 import OrdersPage from "./pages/admin/OrdersPage"
 import UsersPage from "./pages/admin/UsersPage"
 
@@ -47,6 +48,7 @@ export default function App() {
         <Route path="/admin/users" element={<UsersPage />} />
         <Route path="/admin/products" element={<ProductsPage />} />
         <Route path="/admin/orders" element={<OrdersPage />} />
+        <Route path="/admin/reports" element={<ReportsPage />} />
       </Route>
     </Routes>
   )
