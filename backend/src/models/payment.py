@@ -17,4 +17,4 @@ class Payment(Base):
 
     transaction_id = Column(String(255))
 
-    order = relationship('Order', back_populates='payment')
+    order = relationship('Order', back_populates='payment', lazy='selectin')

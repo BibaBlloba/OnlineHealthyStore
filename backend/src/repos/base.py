@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy import delete, insert, select, update, asc, desc, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Load
 
 from src.database import Base
 from src.exceptions import ObjectNotFoundException
@@ -14,12 +15,19 @@ from src.repos.mappers.base import DataMapper
 class BaseRepository:
     model: Type[Base] = Base
     mapper: Type[DataMapper] = None
+    load_options: tuple[Load, ...] = ()
 
     def __init__(self, session: AsyncSession):
         self.session = session
 
+    def _apply_load_options(self, query):
+        if self.load_options:
+            return query.options(*self.load_options)
+
+        return query
+
     async def get_all(self):
-        query = select(self.model)
+        query = self._apply_load_options(select(self.model))
 
         result = await self.session.execute(query)
 
@@ -28,7 +36,9 @@ class BaseRepository:
         ]
 
     async def get_filtered(self, *filters, **filter_by):
-        query = select(self.model).filter(*filters).filter_by(**filter_by)
+        query = self._apply_load_options(
+            select(self.model).filter(*filters).filter_by(**filter_by)
+        )
 
         result = await self.session.execute(query)
 
@@ -37,7 +47,7 @@ class BaseRepository:
         ]
 
     async def get_one_or_none(self, **filter_by):
-        query = select(self.model).filter_by(**filter_by)
+        query = self._apply_load_options(select(self.model).filter_by(**filter_by))
 
         result = await self.session.execute(query)
 
@@ -49,7 +59,7 @@ class BaseRepository:
         return self.mapper.map_to_domain_entity(model)
 
     async def get_one(self, **filter_by):
-        query = select(self.model).filter_by(**filter_by)
+        query = self._apply_load_options(select(self.model).filter_by(**filter_by))
 
         try:
             result = await self.session.execute(query)
@@ -127,7 +137,9 @@ class BaseRepository:
     ):
         offset = (page - 1) * per_page
 
-        query = select(self.model).offset(offset).limit(per_page)
+        query = self._apply_load_options(
+            select(self.model).offset(offset).limit(per_page)
+        )
 
         result = await self.session.execute(query)
 
@@ -142,7 +154,9 @@ class BaseRepository:
         order_dir: str = 'asc',
         **filter_by,
     ):
-        query = select(self.model).filter(*filters).filter_by(**filter_by)
+        query = self._apply_load_options(
+            select(self.model).filter(*filters).filter_by(**filter_by)
+        )
 
         if order_by:
             column = getattr(self.model, order_by, None)

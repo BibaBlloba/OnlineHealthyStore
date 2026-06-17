@@ -6,12 +6,13 @@ from sqlalchemy import delete
 
 from src.models.productImage import ProductImage
 from src.schemas.productImage import ProductImageCreate
-from src.models.product import Product
 from src.api.dependencies import (
     DbDep,
     AdminOnly,
+    CurrentUserDep,
 )
 from src.schemas.product import ProductCreate, ProductSearchParams, ProductUpdate
+from src.schemas.review import ReviewCreate, ReviewRead
 
 
 router = APIRouter(prefix='/products', tags=['Products'])
@@ -156,3 +157,39 @@ async def delete_product_image(
     await db.commit()
 
     return {'status': 'image deleted'}
+
+
+@router.post('/{product_id}/reviews', response_model=ReviewRead)
+async def create_review(
+    product_id: int,
+    data: ReviewCreate,
+    db: DbDep,
+    current_user: CurrentUserDep,
+):
+    product = await db.products.get_one_or_none(id=product_id)
+
+    if not product:
+        raise HTTPException(status_code=404, detail='Товар не найден')
+
+    review = await db.reviews.add(
+        ReviewCreate(
+            rating=data.rating,
+            comment=data.comment,
+            product_id=product_id,
+            user_id=current_user['user_id'],
+        )
+    )
+
+    await db.commit()
+
+    return review
+
+
+@router.get('/{product_id}/reviews', response_model=list[ReviewRead])
+async def get_reviews(product_id: int, db: DbDep):
+    product = await db.products.get_one_or_none(id=product_id)
+
+    if not product:
+        raise HTTPException(status_code=404, detail='Товар не найден')
+
+    return await db.reviews.get_filtered(product_id=product_id)

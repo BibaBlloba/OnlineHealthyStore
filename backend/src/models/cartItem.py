@@ -17,4 +17,4 @@ class CartItem(Base):
 
     cart = relationship('Cart', back_populates='items')
 
-    product = relationship('Product')
+    product = relationship('Product', lazy='selectin')

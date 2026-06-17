@@ -19,4 +19,4 @@ class OrderItem(Base):
 
     order = relationship('Order', back_populates='items')
 
-    product = relationship('Product')
+    product = relationship('Product', lazy='selectin')
