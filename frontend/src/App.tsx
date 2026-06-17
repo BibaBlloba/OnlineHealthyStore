@@ -9,12 +9,14 @@ import AdminPage from "./pages/AdminPage"
 import ProductsPage from "./pages/admin/ProductsPage.tsx"
 
 import MainLayout from "./layouts/MainLayout"
+import AdminLayout from "./layouts/AdminLayout"
 
 import ProtectedRoute from "./components/ProtectedRoute"
 import AdminRoute from "./components/AdminRoute"
 
 export default function App() {
   useCurrentUser()
+
   return (
     <Routes>
       <Route path="/auth" element={<AuthPage />} />
@@ -30,25 +32,18 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
-        <Route
-          path="/admin"
-          element={
-            <AdminRoute>
-              <AdminPage />
-            </AdminRoute>
-          }
-        />
       </Route>
 
       <Route
-        path="/admin/products"
         element={
           <AdminRoute>
-            <ProductsPage />
+            <AdminLayout />
           </AdminRoute>
         }
-      />
+      >
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin/products" element={<ProductsPage />} />
+      </Route>
     </Routes>
   )
 }
