@@ -17,12 +17,17 @@ async def register_user(
         raise HTTPException(401)
     password_hash = AuthService().hash_password(data.password)
 
+    customer_role = await db.roles.get_one_or_none(name='customer')
+
+    if not customer_role:
+        raise HTTPException(status_code=500, detail='Роль customer не найдена')
+
     hashed_user_data = UserAdd(
         first_name=data.first_name,
         last_name=data.last_name,
         email=data.email,
         password_hash=password_hash,
-        role_id=2,
+        role_id=customer_role.id,
     )
 
     try:
