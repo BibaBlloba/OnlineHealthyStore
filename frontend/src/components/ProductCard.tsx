@@ -18,7 +18,7 @@ export default function ProductCard({ product, onAdd }: Props) {
   const imageSrc = imageUrl ? import.meta.env.VITE_API_BASE_URL + imageUrl : null
 
   return (
-    <div className="flex h-[360px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-900 shadow-lg shadow-black/30 transition hover:-translate-y-0.5 hover:border-emerald-400/30 hover:shadow-black/50">
+    <div className="flex h-[390px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-900 shadow-lg shadow-black/30 transition hover:-translate-y-0.5 hover:border-emerald-400/30 hover:shadow-black/50">
       <div className="h-48 w-full bg-slate-950">
         {imageSrc ? (
           <img
