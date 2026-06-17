@@ -9,6 +9,10 @@ class CategoryCreate(CategoryBase):
     pass
 
 
+class CategoryUpdate(BaseModel):
+    name: str | None = None
+
+
 class CategoryRead(CategoryBase):
     id: int
 

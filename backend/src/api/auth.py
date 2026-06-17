@@ -37,7 +37,24 @@ async def register_user(
 async def login_user(
     response: Response,
     db: DbDep,
-    data: UserLogin = Body(),
+    data: UserLogin = Body(
+        openapi_examples={
+            'user': {
+                'summary': 'Regular user login',
+                'value': {
+                    'email': 'user@example.com',
+                    'password': 'string',
+                },
+            },
+            'admin': {
+                'summary': 'Admin login',
+                'value': {
+                    'email': 'admin@shop.ru',
+                    'password': 'admin123',
+                },
+            },
+        }
+    ),
 ):
     user = await db.users.get_by_email(email=data.email)
     if not user:
