@@ -1,7 +1,9 @@
+import { useNavigate } from "react-router-dom"
 import { useAuth } from "../store/auth"
 
 export default function AdminPage() {
   const user = useAuth((s) => s.user)
+  const navigate = useNavigate()
 
   return (
     <div className="container mx-auto p-6">
@@ -15,7 +17,10 @@ export default function AdminPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-        <div className="border rounded-lg p-5">
+        <button
+          onClick={() => navigate("/admin/products")}
+          className="border rounded-lg p-5 text-left hover:bg-gray-50 transition"
+        >
           <h2 className="font-semibold mb-2">
             Products
           </h2>
@@ -23,9 +28,12 @@ export default function AdminPage() {
           <p className="text-sm text-gray-500">
             Manage food items
           </p>
-        </div>
+        </button>
 
-        <div className="border rounded-lg p-5">
+        <button
+          onClick={() => navigate("/admin/orders")}
+          className="border rounded-lg p-5 text-left hover:bg-gray-50 transition"
+        >
           <h2 className="font-semibold mb-2">
             Orders
           </h2>
@@ -33,17 +41,20 @@ export default function AdminPage() {
           <p className="text-sm text-gray-500">
             View customer orders
           </p>
-        </div>
+        </button>
 
-        <div className="border rounded-lg p-5">
+        <button
+          onClick={() => navigate("/admin/categories")}
+          className="border rounded-lg p-5 text-left hover:bg-gray-50 transition"
+        >
           <h2 className="font-semibold mb-2">
-            Users
+            Categories
           </h2>
 
           <p className="text-sm text-gray-500">
-            Manage customers
+            Manage categories
           </p>
-        </div>
+        </button>
 
       </div>
     </div>

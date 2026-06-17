@@ -6,6 +6,7 @@ import HomePage from "./pages/HomePage"
 import CartPage from "./pages/CartPage"
 import AuthPage from "./pages/AuthPage"
 import AdminPage from "./pages/AdminPage"
+import ProductsPage from "./pages/admin/ProductsPage.tsx"
 
 import MainLayout from "./layouts/MainLayout"
 
@@ -39,6 +40,15 @@ export default function App() {
           }
         />
       </Route>
+
+      <Route
+        path="/admin/products"
+        element={
+          <AdminRoute>
+            <ProductsPage />
+          </AdminRoute>
+        }
+      />
     </Routes>
   )
 }

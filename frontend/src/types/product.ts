@@ -1,10 +1,20 @@
-export type Product = {
+export interface ProductImage {
   id: number
-  name: string
-  price: number
+  image_url: string
+  product_id: number
 }
 
-export type ProductsResponse = {
+export interface Product {
+  id: number
+  name: string
+  description: string
+  price: string
+  stock_quantity: number
+  category_id: number
+  images: ProductImage[]
+}
+
+export interface ProductListResponse {
   items: Product[]
   page: number
   per_page: number

@@ -6,10 +6,11 @@ import ProductCard from "../components/ProductCard"
 export default function Home() {
   const [page, setPage] = useState(1)
 
-  const { data, isLoading } = useProducts(page)
+  const { data, isLoading, isError } = useProducts(page)
   const add = useCart((s) => s.add)
 
   if (isLoading) return <div>Loading...</div>
+  if (isError || !data) return <div>Не удалось загрузить товары</div>
 
   const totalPages = Math.ceil(data.total / data.per_page)
 
