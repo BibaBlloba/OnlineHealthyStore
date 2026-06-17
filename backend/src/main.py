@@ -6,6 +6,8 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
+from sqlalchemy.exc import DBAPIError, IntegrityError
 
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -13,8 +15,10 @@ from src.api.auth import router as router_auth
 from src.api.cart import router as router_cart
 from src.api.category import router as router_categories
 from src.api.orders import router as router_orders
+from src.api.reviews import router as router_reviews
 from src.api.products import router as router_products
 from src.utils.admin_create import create_admin
+from src.utils.db_errors import get_db_error_details
 from src.utils.db_manager import DbManager
 from src.database import async_session_maker
 
@@ -36,6 +40,7 @@ app.include_router(router_auth)
 app.include_router(router_cart)
 app.include_router(router_categories)
 app.include_router(router_orders)
+app.include_router(router_reviews)
 app.include_router(router_products)
 
 app.add_middleware(
@@ -47,6 +52,18 @@ app.add_middleware(
 )
 
 app.mount('/static', StaticFiles(directory='static'), name='static')
+
+
+@app.exception_handler(IntegrityError)
+async def integrity_error_handler(_, exception: IntegrityError):
+    status_code, detail = get_db_error_details(exception)
+    return JSONResponse(status_code=status_code, content={'detail': detail})
+
+
+@app.exception_handler(DBAPIError)
+async def dbapi_error_handler(_, exception: DBAPIError):
+    status_code, detail = get_db_error_details(exception)
+    return JSONResponse(status_code=status_code, content={'detail': detail})
 
 
 if __name__ == '__main__':
