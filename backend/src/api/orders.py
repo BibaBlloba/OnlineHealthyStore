@@ -2,12 +2,12 @@ from decimal import Decimal
 from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException
-from sqlalchemy import text
 
 from src.api.dependencies import CurrentUserDep, DbDep
 from src.schemas.order import OrderCreate, OrderRead, OrderUpdate
 from src.schemas.orderItem import OrderItemCreate
 from src.schemas.payment import PaymentCreate, PaymentPayRequest
+from src.schemas.product import ProductUpdate
 
 
 router = APIRouter(prefix='/orders', tags=['Orders'])
@@ -96,6 +96,9 @@ async def pay_order(
     if not order:
         raise HTTPException(status_code=404, detail='Заказ не найден')
 
+    if order.status == 'paid' or (order.payment and order.payment.status == 'paid'):
+        raise HTTPException(status_code=400, detail='Заказ уже оплачен')
+
     transaction_id = f'payment-{uuid4().hex}'
 
     payment = await db.payments.get_one_or_none(order_id=order_id)
@@ -115,9 +118,26 @@ async def pay_order(
     else:
         await db.payments.add(payment_payload)
 
-    await db.session.execute(text('CALL reduce_stock(:order_id)'), {'order_id': order_id})
+    for item in order.items:
+        stock_quantity = item.product.stock_quantity or 0
 
-    await db.session.execute(text('CALL pay_order(:order_id)'), {'order_id': order_id})
+        if stock_quantity < item.quantity:
+            raise HTTPException(
+                status_code=400,
+                detail=f'Недостаточно товара на складе: {item.product.name}',
+            )
+
+        await db.products.edit(
+            data=ProductUpdate(stock_quantity=stock_quantity - item.quantity),
+            id=item.product_id,
+            exclude_unset=True,
+        )
+
+    await db.orders.edit(
+        data=OrderUpdate(status='paid'),
+        id=order_id,
+        exclude_unset=True,
+    )
 
     await db.commit()
 

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Numeric, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Numeric, Text, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 
 from src.database import Base
@@ -15,6 +15,8 @@ class Product(Base):
     price = Column(Numeric(10, 2), nullable=False)
 
     stock_quantity = Column(Integer, default=0)
+
+    updated_at = Column(DateTime(timezone=True))
 
     category_id = Column(Integer, ForeignKey('categories.id', ondelete='CASCADE'))
 
