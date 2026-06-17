@@ -1,6 +1,6 @@
-import { privateApi } from "./client"
+import { publicApi } from "./client"
 
 export const getCategories = async () => {
-  const res = await privateApi.get("/categories/")
+  const res = await publicApi.get("/categories/")
   return res.data
 }
