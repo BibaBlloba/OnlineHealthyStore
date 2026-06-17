@@ -17,7 +17,7 @@ from src.api.category import router as router_categories
 from src.api.orders import router as router_orders
 from src.api.reviews import router as router_reviews
 from src.api.products import router as router_products
-from src.utils.admin_create import create_admin
+from src.utils.admin_create import create_admin, seed_roles
 from src.utils.db_errors import get_db_error_details
 from src.utils.db_manager import DbManager
 from src.database import async_session_maker
@@ -26,6 +26,7 @@ from src.database import async_session_maker
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with DbManager(session_factory=async_session_maker) as db:
+        await seed_roles(db)
         await create_admin(db)
     yield
 
