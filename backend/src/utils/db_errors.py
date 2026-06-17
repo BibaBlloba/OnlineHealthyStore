@@ -1,6 +1,8 @@
 from sqlalchemy.exc import DBAPIError, IntegrityError
 import re
+import logging
 
+logger = logging.getLogger(__name__)
 
 def _get_sqlstate(exception: Exception) -> str | None:
     orig = getattr(exception, 'orig', None)
@@ -74,6 +76,7 @@ def get_db_error_details(exception: Exception) -> tuple[int, str]:
         return 400, message
 
     if isinstance(exception, (IntegrityError, DBAPIError)):
+        logger.exception("IntegrityError")
         return 500, 'Ошибка работы с базой данных'
 
     return 500, 'Неожиданная ошибка базы данных'

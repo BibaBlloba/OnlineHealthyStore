@@ -1,5 +1,14 @@
 import { privateApi } from "./client"
 
+export type AdminUser = {
+  id: number
+  email: string
+  first_name: string
+  last_name: string
+  role_id: number
+  [key: string]: unknown
+}
+
 export const register = async (data: {
   email: string
   first_name: string
@@ -25,5 +34,15 @@ export const logout = async () => {
 
 export const me = async () => {
   const res = await privateApi.get("/auth/me")
+  return res.data
+}
+
+export const getUsers = async () => {
+  const res = await privateApi.get<AdminUser[]>("/auth")
+  return res.data
+}
+
+export const deleteUser = async (userId: number) => {
+  const res = await privateApi.delete(`/auth/${userId}`)
   return res.data
 }

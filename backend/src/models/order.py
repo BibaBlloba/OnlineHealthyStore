@@ -9,7 +9,7 @@ class Order(Base):
 
     id = Column(Integer, primary_key=True)
 
-    user_id = Column(Integer, ForeignKey('users.id'))
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'))
 
     total_price = Column(Numeric(10, 2), default=0)
 
