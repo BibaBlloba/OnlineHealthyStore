@@ -9,6 +9,26 @@ export type AdminUser = {
   [key: string]: unknown
 }
 
+const normalizeUsersResponse = (payload: unknown): AdminUser[] => {
+  if (Array.isArray(payload)) {
+    return payload as AdminUser[]
+  }
+
+  if (payload && typeof payload === "object") {
+    const data = (payload as { data?: unknown; users?: unknown }).data
+    if (Array.isArray(data)) {
+      return data as AdminUser[]
+    }
+
+    const users = (payload as { data?: unknown; users?: unknown }).users
+    if (Array.isArray(users)) {
+      return users as AdminUser[]
+    }
+  }
+
+  return []
+}
+
 export const register = async (data: {
   email: string
   first_name: string
@@ -37,9 +57,14 @@ export const me = async () => {
   return res.data
 }
 
-export const getUsers = async () => {
-  const res = await privateApi.get<AdminUser[]>("/auth")
-  return res.data
+export const getUsers = async (params: { page?: number; per_page?: number } = {}) => {
+  const res = await privateApi.get<AdminUser[]>("/auth/", {
+    params: {
+      page: params.page ?? 1,
+      per_page: params.per_page ?? 10,
+    },
+  })
+  return normalizeUsersResponse(res.data)
 }
 
 export const deleteUser = async (userId: number) => {
