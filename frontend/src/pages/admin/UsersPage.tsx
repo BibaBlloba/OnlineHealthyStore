@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
-import { deleteUser, getUsers } from "../../api/auth"
+import { deleteUser, getUsers, type AdminUser } from "../../api/auth"
 import { useAuth } from "../../store/auth"
 
 const roleLabel = (roleId?: number) => (roleId === 1 ? "Admin" : "User")
@@ -9,9 +9,9 @@ export default function UsersPage() {
   const queryClient = useQueryClient()
   const currentUserId = useAuth((s) => s.user?.id)
 
-  const usersQuery = useQuery({
+  const usersQuery = useQuery<AdminUser[]>({
     queryKey: ["users"],
-    queryFn: getUsers,
+    queryFn: () => getUsers(),
   })
 
   const deleteMutation = useMutation({
