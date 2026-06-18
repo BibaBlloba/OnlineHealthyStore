@@ -597,7 +597,7 @@ export default function ReportsPage() {
 
   const usersQuery = useQuery<AdminUser[]>({
     queryKey: ["reports", "users"],
-    queryFn: getUsers,
+    queryFn: () => getUsers({ page: 1, per_page: 250 }),
   })
 
   const categoriesQuery = useQuery<Category[]>({
